@@ -54,7 +54,11 @@ function generatePassword() {
     if (areCharacterOptionsValid(options)) {
       break;
     }
-  } while (confirm(retryCharOptionsMessage));
+
+    if (!confirm(retryCharOptionsMessage)) {
+      return "";
+    }
+  } while(true)
 }
 
 // Get references to the #generate element.
