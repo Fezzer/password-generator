@@ -3,7 +3,11 @@ const numericChars = "0123456789"; // String of numeric characters to be include
 const lowerCasedChars = "abcdefghijklmnopqrstuvwxyz"; // String of lowercase characters to be included in password.
 const upperCasedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";// String of uppercase characters to be included in password.
 const charTypePropNamePrefix = "use"; // Prefix for character type option property names.
-const retryCharOptionsMessage = "You must select at least one type of characters to use.\n\nDo you want to try again?"
+const minLength = 10; // Minimum allowed password length.
+const maxLength = 64; // Maximum allowed password length.
+const retryCharOptionsMessage = "You must select at least one type of characters to use.\n\nDo you want to try again?"; // Retry select character type options message.
+const lengthInputPrompt = `Please enter a length for your password between ${minLength} and ${maxLength} characters.`; // Length input prompt.
+const lengthInvalidMessage = "You did not enter a valid length."; // Invalid length message.
 
 // Function to prompt for a character option.
 function promptForCharacterOption(name) {
@@ -34,6 +38,17 @@ function areCharacterOptionsValid(options) {
     .some(([k, v]) => v);
 }
 
+// Function to validate length input.
+function isLengthValid(length) {
+  let parsedLength = parseInt(length);
+
+  if (length == parsedLength && parsedLength >= minLength && parsedLength <= maxLength) {
+    return true;
+  }
+
+  return false;
+}
+
 // Function for getting a random element from an array.
 function getRandom(arr) {
 
@@ -41,12 +56,30 @@ function getRandom(arr) {
 
 // Function to generate password with user input.
 function generatePassword() {
-  var options = {
+  let options = {
     useSpecial: false,
     useNumeric: false,
     useUpperCase: false,
-    useLowerCase: false
+    useLowerCase: false,
+    length: 0
   };
+
+  let lengthWasInvalid = false;
+
+  do {
+    var length = prompt(`${lengthWasInvalid ? lengthInvalidMessage + "\n\n" : ""}${lengthInputPrompt}`);
+    
+    if (length === null) {
+      return "";
+    }
+
+    if (isLengthValid(length)) {
+      options.length = parseInt(length);
+      break;
+    }
+
+    lengthWasInvalid = true;
+  } while(true)
 
   do {
     getPasswordCharOptions(options);
