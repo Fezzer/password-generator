@@ -108,18 +108,27 @@ function promptForOptions() {
   return options;
 }
 
+// Function to validate that the password contains a character from each of the selected character types.
+function isPasswordValid(password, charTypes) {
+  return charTypes.every(ct => ct.split("").some(c => password.indexOf(c) !== -1));
+}
+
 // Function to generate password with user input.
 function generatePassword(options) {
   let enabledCharTypes = Object.entries(charTypes)
     .filter(([k, _]) => getEnabledCharTypes(options).includes(k))
     .map(([_, v]) => v);
 
-  let password = "";
+  let password;
 
-  for (let i = 0; i < options.passwordLength; i++) {
-    let charType = enabledCharTypes[getRandomNumber(enabledCharTypes.length)];
-    password += charType[getRandomNumber(charType.length)];
-  }
+  do {
+    password = "";
+
+    for (let i = 0; i < options.passwordLength; i++) {
+      let charType = enabledCharTypes[getRandomNumber(enabledCharTypes.length)];
+      password += charType[getRandomNumber(charType.length)];
+    }
+  } while (!isPasswordValid(password, enabledCharTypes));
 
   return password;
 }
