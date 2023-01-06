@@ -3,7 +3,7 @@ const numericChars = "0123456789"; // String of numeric characters to be include
 const lowerCasedChars = "abcdefghijklmnopqrstuvwxyz"; // String of lowercase characters to be included in password.
 const upperCasedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";// String of uppercase characters to be included in password.
 const charTypePropNamePrefix = "use"; // Prefix for character type option property names.
-const retryCharOptionsMessage = "You must select at least one type of characters to use.\n\nDo you want ot try again?"
+const retryCharOptionsMessage = "You must select at least one type of characters to use.\n\nDo you want to try again?"
 
 // Function to prompt for a character option.
 function promptForCharacterOption(name) {
