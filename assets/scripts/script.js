@@ -1,8 +1,8 @@
 const charTypes = {
   special: "@%+\\/'!#$^?:,)(}{][~-_.", // String of special characters to be included in password.
   numeric: "0123456789", // String of numeric characters to be included in password.
-  lowerCase: "abcdefghijklmnopqrstuvwxyz", // String of lowercase characters to be included in password.
-  upperCase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ" // String of uppercase characters to be included in password.
+  lowercase: "abcdefghijklmnopqrstuvwxyz", // String of lowercase characters to be included in password.
+  uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ" // String of uppercase characters to be included in password.
 };
 
 const charTypePropNamePrefix = "use"; // Prefix for character type option property names.
@@ -17,21 +17,18 @@ function promptForCharacterOption(name) {
   return confirm(`Do you want to use ${name} characters?`)
 }
 
-// Function to generate character option type description from options property name for use in the prompts.
-function getCharOptionDescription(name) {
-  let withoutPrefix = name.slice(charTypePropNamePrefix.length);
-  
-  return withoutPrefix.replace(
-    /[A-Z]/g, 
-    (match, offset) => (offset > 0 ? " " : "") + match.toLowerCase()
-  );
+// Function to get the character type name from an options property.
+function getCharTypeName(propertyName) {
+  return propertyName
+    .slice(charTypePropNamePrefix.length)
+    .replace(/^[A-Z]/, match => match.toLowerCase());
 }
 
 // Function to prompt user for password character options.
 function getPasswordCharOptions(options) {
   Object.keys(options)
     .filter(k => k.startsWith(charTypePropNamePrefix))
-    .forEach(k => options[k] = promptForCharacterOption(getCharOptionDescription(k)))
+    .forEach(k => options[k] = promptForCharacterOption(getCharTypeName(k)))
 }
 
 // Function to validate character options.
@@ -62,18 +59,17 @@ function initialiseOptions() {
   return {
     useSpecial: false,
     useNumeric: false,
-    useUpperCase: false,
-    useLowerCase: false,
+    useUppercase: false,
+    useLowercase: false,
     passwordLength: 0
   };
 }
 
 // Function that gets the enabled character types property names from an options object.
-function getEnabledCharTypes(options) {
+function getEnabledCharTypeNames(options) {
   return Object.entries(options)
     .filter(([k, v]) => k.startsWith(charTypePropNamePrefix) && v)
-    .map(([k, _]) => k.slice(charTypePropNamePrefix.length))
-    .map(k => k.replace(/^[A-Z]/, m => m.toLowerCase()));
+    .map(([k, _]) => getCharTypeName(k));
 }
 
 // Function to prompt for and validate options.
@@ -82,7 +78,7 @@ function promptForOptions() {
   let lengthWasInvalid = false;
 
   do {
-    var length = prompt(`${lengthWasInvalid ? lengthInvalidMessage + "\n\n" : ""}${lengthInputPrompt}`);
+    let length = prompt(`${lengthWasInvalid ? lengthInvalidMessage + "\n\n" : ""}${lengthInputPrompt}`);
     
     if (length === null)
       return;
@@ -116,7 +112,7 @@ function isPasswordValid(password, charTypes) {
 // Function to generate password with user input.
 function generatePassword(options) {
   let enabledCharTypes = Object.entries(charTypes)
-    .filter(([k, _]) => getEnabledCharTypes(options).includes(k))
+    .filter(([k, _]) => getEnabledCharTypeNames(options).includes(k))
     .map(([_, v]) => v);
 
   let password;
