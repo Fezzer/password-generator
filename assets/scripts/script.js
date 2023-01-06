@@ -1,7 +1,10 @@
-const specialChars = "@%+\\/'!#$^?:,)(}{][~-_."; // String of special characters to be included in password.
-const numericChars = "0123456789"; // String of numeric characters to be included in password.
-const lowerCasedChars = "abcdefghijklmnopqrstuvwxyz"; // String of lowercase characters to be included in password.
-const upperCasedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";// String of uppercase characters to be included in password.
+const charTypes = {
+  special: "@%+\\/'!#$^?:,)(}{][~-_.", // String of special characters to be included in password.
+  numeric: "0123456789", // String of numeric characters to be included in password.
+  lowerCase: "abcdefghijklmnopqrstuvwxyz", // String of lowercase characters to be included in password.
+  upperCase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ" // String of uppercase characters to be included in password.
+};
+
 const charTypePropNamePrefix = "use"; // Prefix for character type option property names.
 const minLength = 10; // Minimum allowed password length.
 const maxLength = 64; // Maximum allowed password length.
@@ -14,7 +17,7 @@ function promptForCharacterOption(name) {
   return confirm(`Do you want to use ${name} characters?`)
 }
 
-// Function to generate character option type description from property name for use in the prompts.
+// Function to generate character option type description from options property name for use in the prompts.
 function getCharOptionDescription(name) {
   let withoutPrefix = name.slice(charTypePropNamePrefix.length);
   
@@ -34,8 +37,8 @@ function getPasswordCharOptions(options) {
 // Function to validate character options.
 function areCharacterOptionsValid(options) {
   return Object.entries(options)
-    .filter(([k, v]) => k.startsWith(charTypePropNamePrefix))
-    .some(([k, v]) => v);
+    .filter(([k, _]) => k.startsWith(charTypePropNamePrefix))
+    .some(([_, v]) => v);
 }
 
 // Function to validate length input.
@@ -49,49 +52,76 @@ function isLengthValid(length) {
   return false;
 }
 
-// Function for getting a random element from an array.
-function getRandom(arr) {
-
+// Function for getting a random number in a specific range.
+function getRandomNumber(size) {
+  return Math.floor(Math.random() * size);
 }
 
-// Function to generate password with user input.
-function generatePassword() {
-  let options = {
+// Function to initialise an options object.
+function initialiseOptions() {
+  return {
     useSpecial: false,
     useNumeric: false,
     useUpperCase: false,
     useLowerCase: false,
-    length: 0
+    passwordLength: 0
   };
+}
 
+// Function that gets the enabled character types property names from an options object.
+function getEnabledCharTypes(options) {
+  return Object.entries(options)
+    .filter(([k, v]) => k.startsWith(charTypePropNamePrefix) && v)
+    .map(([k, _]) => k.slice(charTypePropNamePrefix.length))
+    .map(k => k.replace(/^[A-Z]/, m => m.toLowerCase()));
+}
+
+// Function to prompt for and validate options.
+function promptForOptions() {
+  let options = initialiseOptions();
   let lengthWasInvalid = false;
 
   do {
     var length = prompt(`${lengthWasInvalid ? lengthInvalidMessage + "\n\n" : ""}${lengthInputPrompt}`);
     
-    if (length === null) {
-      return "";
-    }
+    if (length === null)
+      return;
 
     if (isLengthValid(length)) {
-      options.length = parseInt(length);
+      options.passwordLength = parseInt(length);
       break;
     }
 
     lengthWasInvalid = true;
-  } while(true)
+  } while(true);
 
   do {
     getPasswordCharOptions(options);
 
-    if (areCharacterOptionsValid(options)) {
+    if (areCharacterOptionsValid(options)) 
       break;
-    }
 
-    if (!confirm(retryCharOptionsMessage)) {
-      return "";
-    }
-  } while(true)
+    if (!confirm(retryCharOptionsMessage))
+      return;
+  } while(true);
+
+  return options;
+}
+
+// Function to generate password with user input.
+function generatePassword(options) {
+  let enabledCharTypes = Object.entries(charTypes)
+    .filter(([k, _]) => getEnabledCharTypes(options).includes(k))
+    .map(([_, v]) => v);
+
+  let password = "";
+
+  for (let i = 0; i < options.passwordLength; i++) {
+    let charType = enabledCharTypes[getRandomNumber(enabledCharTypes.length)];
+    password += charType[getRandomNumber(charType.length)];
+  }
+
+  return password;
 }
 
 // Get references to the #generate element.
@@ -99,7 +129,12 @@ var generateBtn = document.querySelector('#generate');
 
 // Write password to the #password input.
 function writePassword() {
-  var password = generatePassword();
+  var options = promptForOptions();
+  
+  if (options == undefined)
+    return;
+
+  var password = generatePassword(options);
   var passwordText = document.querySelector('#password');
 
   passwordText.value = password;
