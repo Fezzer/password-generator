@@ -21,7 +21,7 @@ function promptForCharacterOption(name) {
 function getCharTypeName(propertyName) {
   return propertyName
     .slice(charTypePropNamePrefix.length)
-    .replace(/^[A-Z]/, match => match.toLowerCase());
+    .toLowerCase();
 }
 
 // Function to prompt user for password character options.
